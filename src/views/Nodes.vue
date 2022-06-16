@@ -2,14 +2,17 @@
   <div class="d-flex flex-column blocks-wrapper">
     <h1 class="main-title">Nodes</h1>
     <v-row justify="center" class="accordion">
-      <v-expansion-panels accordion
-        v-for="(item,i) in getNodes" :key="i">
-          <node :key="i" :node="{
-            name: item.name,
-            online: item.online,
-            url: item.url,
-            loading: item.loading,
-          }"
+      <v-expansion-panels v-model="panels" multiple accordion>
+          <node
+            v-for="(item,i) in getNodes"
+            :key="i"
+            :node="{
+              name: item.name,
+              online: item.online,
+              url: item.url,
+              loading: item.loading,
+              blocks: item.blocks,
+            }"
           />
       </v-expansion-panels>
     </v-row>
@@ -26,13 +29,30 @@ export default {
     Node,
   },
   data: () => ({
-    data: []
+    panels: []
   }),
   computed: {
     ...mapGetters(['getNodes']),
   },
+  watch: {
+    panels(value, oldValue) {
+      const addicted = value.filter(v => oldValue.indexOf(v) === -1)
+      const removed = oldValue.filter(o => value.indexOf(o) === -1)
+
+      addicted.forEach(index => {
+        this.loadBlocks(this.getNodes[index])
+      });
+      removed.forEach(index => {
+        this.resetBlocks(this.getNodes[index])
+      });
+    }
+  },
   methods: {
-    ...mapActions(['getAllNodes']),
+    ...mapActions([
+      'getAllNodes',
+      'loadBlocks',
+      'resetBlocks'
+    ]),
   },
   async mounted() {
     await this.getAllNodes(this.getNodes);
@@ -93,6 +113,10 @@ export default {
   .v-expansion-panel-header {
     padding-left: 20px;
     padding-top: 14px;
+  }
+
+  .v-expansion-panel {
+    margin-bottom: 12px;
   }
 
   @media only screen and (max-width: 768px) {

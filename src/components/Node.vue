@@ -19,12 +19,24 @@
       </div>
     </v-expansion-panel-header>
     <v-expansion-panel-content>
-      <span>Here goes the content</span>
+      <div v-if="node.blocks.loading">
+        <v-skeleton-loader v-for="i in 3" :key="i" type="list-item" />
+      </div>
+      <Block
+        v-for="(block, i) in node.blocks.list"
+        :key="i"
+        :block="{
+          title: block.id,
+          description: block.attributes.data
+        }"
+      />
     </v-expansion-panel-content>
   </v-expansion-panel>
 </template>
 
 <script>
+import Block from './Block.vue';
+
 export default {
   name: 'node',
   props: {
@@ -33,10 +45,13 @@ export default {
       online: Boolean,
       name: String,
       loading: Boolean,
+      blocks: {
+        loading: Boolean,
+        list: Array
+      },
     }
   },
-  data: () => ({
-  }),
+  components: {Block},
   computed: {
     getColor() {
       let badgeColor = '#Eb5757';
